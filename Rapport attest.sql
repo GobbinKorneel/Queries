@@ -1,7 +1,7 @@
 use WiseZonderFK
 
 select Leerlingen.ID as LL_ID,
-
+	CONVERT(BINARY(64), hashbytes('SHA2_512', CONCAT(Leerlingen.ID, '|', Leerlingen.LL_NAAM, '|', Leerlingen.LL_Voornaam, ''))) as hashID,
 	LB_VAN,
 	LB_TOT,
 	IU_DATUMUITSCHRIJVING,
@@ -135,11 +135,12 @@ left join PeriodeEvaluaties pe3 on pe3.ID = Dagelijkswerken.DR_PERIODEEVALUATIE_
 
 
 
-where Scholen.SC_INSTELLINGSNUMMER = '035584' 
+where Scholen.SC_INSTELLINGSNUMMER = '035527' 
 and Leerlingkenmerken.isAltijdSet is not null
 and Attesten.AT_HOOFDATTEST = 1
 and BO_TYPE = 2 -- zorgt ervoor dat de toetsen/taken niet weergegeven worden
 and BB_TYPE_FKP <> 15237  -- zorgt ervoor dat de deelresultaten niet weergegeven worden
+and Evaluatieverwijzingen.EV_TYPE = 1
 
 --and LL_NAAM = 'Roobroeck'
 --and LL_VOORNAAM = 'Tore'

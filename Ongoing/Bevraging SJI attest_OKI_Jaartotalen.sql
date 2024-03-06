@@ -8,8 +8,11 @@ select Leerlingen.ID as LL_ID,
 	LL_NAAM,
 	LL_VOORNAAM,
 	--LL_GOK, 
-	KL_OMSCHRIJVING as Klas,
-	SJ_OMSCHRIJVINGKORT as Schooljaar,
+	klassen.KL_OMSCHRIJVING as Klas,
+
+	Schooljaren.SJ_OMSCHRIJVINGKORT as Schooljaar,
+	SJ2.SJ_OMSCHRIJVINGKORT as [Schooljaar vakkenpakket],
+
 	leerjaar.P_OMSCHRIJVING as Leerjaar,
 	graad.P_OMSCHRIJVING as Graad,
 	LL_GESLACHT AS Geslacht,
@@ -93,8 +96,8 @@ left join InUit on IU_LEERLING_FK = Leerlingen.ID
 left join Loopbanen on LB_INUIT_FK = InUit.ID
 left join Scholen on Scholen.Id = IU_SCHOOL_FK
 left join Klasgroepen on Klasgroepen.ID = LB_KLASGROEP_FK
-left join Klassen on Klassen.ID = KG_KLAS_FK
---left join Schooljaren on Schooljaren.ID = Klassen.KL_SCHOOLJAAR_FK
+left join Klassen on Klassen.ID = KG_KLAS_FK							-- zie commentaar hierna
+left join Schooljaren on Schooljaren.ID = Klassen.KL_SCHOOLJAAR_FK     -- Dit eruit wegens geen schooljaren op deze manier voor uitschrijvers tijdens het jaar, onderaan toegevoegd en gelinkt via puntenbladen
 left join ParmTabs leerjaar on leerjaar.ID = LB_LEERJAAR_FKP
 left join ParmTabs graad on graad.ID = LB_GRAAD_FKP
 left join ParmTabs herkomst on herkomst.ID = LL_HERKOMST_FKP
@@ -118,7 +121,7 @@ left join Attesten on Attesten.ID = GT_ATTEST_FK
 left join BeoordelingWaardes on Loopbanen.ID = BeoordelingWaardes.BW_LOOPBAAN_FK
 left join Beoordelingen on Beoordelingen.ID = BeoordelingWaardes.BW_BEOORDELING_FK
 left join BeoordelingBerekeningen on BeoordelingBerekeningen.ID = Beoordelingen.BO_BEOORDELINGBEREKENING_FK
-left join Puntenbladen on Puntenbladen.ID = BeoordelingBerekeningen.BB_PUNTENBLAD_FK --and Schooljaren.ID = Puntenbladen.PL_SCHOOLJAAR_FK
+left join Puntenbladen on Puntenbladen.ID = BeoordelingBerekeningen.BB_PUNTENBLAD_FK --and Schooljaren.ID = Puntenbladen.PL_SCHOOLJAAR_FK -- geen invloed
 left join IngVakken on IngVakken.ID = Puntenbladen.PL_INGVAK_FK
 left join ParmTabs wat on wat.ID = BeoordelingBerekeningen.BB_TYPE_FKP
 left join Instellingen on Instellingen.ID = IngVakken.IV_INSTELLING_FK
@@ -132,18 +135,20 @@ left join Examens on Examens.id = Evaluatieverwijzingen.EV_EXAMEN_FK and Evaluat
 left join PeriodeEvaluaties pe2 on pe2.ID = Examens.EX_PERIODEEVALUATIE_FK  
 left join PeriodeEvaluaties pe3 on pe3.ID = Dagelijkswerken.DR_PERIODEEVALUATIE_FK  
 
-left join Schooljaren on Schooljaren.ID = Vakkenpakketten.VK_SCHOOLJAAR_FK
+left join Vakkenpakketten on Vakkenpakketten.ID = Loopbanen.LB_VAKKENPAKKET_FK
+left join Schooljaren SJ2 on SJ2.ID = Vakkenpakketten.VK_SCHOOLJAAR_FK
+--left join Klassen KL2 on
 
 
 
-
-where Scholen.SC_INSTELLINGSNUMMER = '035584' 
+where Scholen.SC_INSTELLINGSNUMMER = '035527' 
 and Leerlingkenmerken.isAltijdSet is not null
 and Attesten.AT_HOOFDATTEST = 1
 and BO_TYPE = 2 -- zorgt ervoor dat de toetsen/taken niet weergegeven worden
 and BB_TYPE_FKP <> 15237  -- zorgt ervoor dat de deelresultaten niet weergegeven worden
---and SJ_OMSCHRIJVINGKORT is null
---and Evaluatieverwijzingen.EV_TYPE = 1 -- zorgt ervoor dat enkel jaartotalen zichtbaar zijn
+and Evaluatieverwijzingen.EV_TYPE = 1 -- zorgt ervoor dat enkel jaartotalen zichtbaar zijn
+and Schooljaren.SJ_OMSCHRIJVINGKORT is null
+
 
 --and LL_NAAM = 'Roobroeck'
 --and LL_VOORNAAM = 'Tore'

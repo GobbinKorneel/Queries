@@ -1,12 +1,13 @@
 use WiseZonderFK
 
-select Leerlingen.ID as LL_ID,
+select 
+	--Leerlingen.ID as LL_ID,
 	CONVERT(BINARY(64), hashbytes('SHA2_512', CONCAT(Leerlingen.ID, '|', Leerlingen.LL_NAAM, '|', Leerlingen.LL_Voornaam, ''))) as hashID,
-	LB_VAN,
-	LB_TOT,
-	IU_DATUMUITSCHRIJVING,
-	LL_NAAM,
-	LL_VOORNAAM,
+	LB_VAN as [Loopbaan van],
+	LB_TOT as [Loopbaan tot],
+	IU_DATUMUITSCHRIJVING as [Datum uitschrijving],
+	--LL_NAAM,
+	--LL_VOORNAAM,
 	--LL_GOK, 
 	KL_OMSCHRIJVING as Klas,
 	SJ_OMSCHRIJVINGKORT as Schooljaar,
@@ -31,7 +32,7 @@ select Leerlingen.ID as LL_ID,
 	Getuigschriften.GT_CLAUSULERING as [Clausulering], 
 	Getuigschriften.GT_DATUMUITGEREIKT as [Datum uitreiking],
 	BasisonderwijsNL.P_OMSCHRIJVING as [Basisonderwijs NL],
-	GetuigschriftBB.P_OMSCHRIJVING as [Getuigschrift Bedrijfsbeheer?],
+	--GetuigschriftBB.P_OMSCHRIJVING as [Getuigschrift Bedrijfsbeheer?],
 	Leerlingkenmerken.isMoederNederlandsSet as [Moeder - Nederlandstalig],
 	Leerlingkenmerken.isMoederFransSet as [Moeder - Franstalig],
 	Leerlingkenmerken.isMoederAndersSet as [Moeder - Anderstalig (niet N/F)],
@@ -58,29 +59,29 @@ select Leerlingen.ID as LL_ID,
 	Leerlingkenmerken.isTaalVanLeerlingNietNederlandsSet as [Thuistaal niet-Nederlands],
 
 
-	BeoordelingWaardes.ID as [ID Beoordelingswaarde],
-	BeoordelingBerekeningen.BB_CODE as [Code beoordelingsberekening],
-	BeoordelingBerekeningen.BB_OMSCHRIJVING as [Omschrijving beoordelingsberekening],
+	--BeoordelingWaardes.ID as [ID Beoordelingswaarde],
+	--BeoordelingBerekeningen.BB_CODE as [Code beoordelingsberekening],
+	--BeoordelingBerekeningen.BB_OMSCHRIJVING as [Omschrijving beoordelingsberekening],
 	ROUND(BeoordelingWaardes.BW_NUMERIEK * 100, 2) as Procent,
-	Puntenbladen.PL_NAAM as [Puntenblad],
+	--Puntenbladen.PL_NAAM as [Puntenblad],
 	IngVakken.IV_NAAMGEBRUIKER as Vak,
 	wat.P_OMSCHRIJVING as [Omschrijving berekening],
 	Instellingen.IS_NAAMGEBRUIKER as Instelling,
-	Evaluatieverwijzingen.EV_TYPE as [Evaluatiesoort],
+	--Evaluatieverwijzingen.EV_TYPE as [Evaluatiesoort],
 	case 
 		when Evaluatieverwijzingen.EV_TYPE = 1 then 'Jaarevaluatie'
 		when Evaluatieverwijzingen.EV_TYPE = 2 then 'Periode evaluatie'
 		when Evaluatieverwijzingen.EV_TYPE = 3 then 'Dagelijks werk'
 		when Evaluatieverwijzingen.EV_TYPE = 4 then 'Examen'
 	End as [Type evaluatie],
-	COALESCE(Examens.EX_CODE, Dagelijkswerken.DR_CODE) as [Code],
-	coalesce(Examens.EX_OMSCHRIJVING, Dagelijkswerken.DR_OMSCHRIJVING) as Omschrijving,
-	coalesce(PeriodeEvaluaties.PEV_CODE, PE2.PEV_CODE, pe3.PEV_CODE) as [Code periode],
-	coalesce(PeriodeEvaluaties.PEV_OMSCHRIJVING, pe2.PEV_OMSCHRIJVING, pe3.PEV_OMSCHRIJVING) as [Omschrijving periode],
-	Jaarevaluaties.JE_AANTALPERIODES as [Aantal periodes],
-	PeriodeEvaluaties.PEV_AANTALDW as [Aantal DW],
-	PeriodeEvaluaties.PEV_AANTALEX as [Aantal EX],
-	BB_TYPE_FKP
+	--COALESCE(Examens.EX_CODE, Dagelijkswerken.DR_CODE) as [Code],
+	--coalesce(Examens.EX_OMSCHRIJVING, Dagelijkswerken.DR_OMSCHRIJVING) as Omschrijving,
+	--coalesce(PeriodeEvaluaties.PEV_CODE, PE2.PEV_CODE, pe3.PEV_CODE) as [Code periode],
+	--coalesce(PeriodeEvaluaties.PEV_OMSCHRIJVING, pe2.PEV_OMSCHRIJVING, pe3.PEV_OMSCHRIJVING) as [Omschrijving periode],
+	Jaarevaluaties.JE_AANTALPERIODES as [Aantal periodes]--,
+	--PeriodeEvaluaties.PEV_AANTALDW as [Aantal DW],
+	--PeriodeEvaluaties.PEV_AANTALEX as [Aantal EX],
+	--BB_TYPE_FKP
 	
 	
 
@@ -142,8 +143,7 @@ and BO_TYPE = 2 -- zorgt ervoor dat de toetsen/taken niet weergegeven worden
 and BB_TYPE_FKP <> 15237  -- zorgt ervoor dat de deelresultaten niet weergegeven worden
 and Evaluatieverwijzingen.EV_TYPE = 1 -- zorgt ervoor dat enkel jaartotalen zichtbaar zijn
 
---and LL_NAAM = 'Roobroeck'
---and LL_VOORNAAM = 'Tore'
+
 
 
 order by LL_NAAM, LL_VOORNAAM, [Datum uitreiking]

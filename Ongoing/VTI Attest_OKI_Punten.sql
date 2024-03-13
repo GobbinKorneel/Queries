@@ -94,7 +94,7 @@ left join Loopbanen on LB_INUIT_FK = InUit.ID
 left join Scholen on Scholen.Id = IU_SCHOOL_FK
 left join Klasgroepen on Klasgroepen.ID = LB_KLASGROEP_FK
 left join Klassen on Klassen.ID = KG_KLAS_FK
---left join Schooljaren on Schooljaren.ID = Klassen.KL_SCHOOLJAAR_FK
+left join Schooljaren on Schooljaren.ID = Klassen.KL_SCHOOLJAAR_FK
 left join ParmTabs leerjaar on leerjaar.ID = LB_LEERJAAR_FKP
 left join ParmTabs graad on graad.ID = LB_GRAAD_FKP
 left join ParmTabs herkomst on herkomst.ID = LL_HERKOMST_FKP
@@ -132,7 +132,6 @@ left join Examens on Examens.id = Evaluatieverwijzingen.EV_EXAMEN_FK and Evaluat
 left join PeriodeEvaluaties pe2 on pe2.ID = Examens.EX_PERIODEEVALUATIE_FK  
 left join PeriodeEvaluaties pe3 on pe3.ID = Dagelijkswerken.DR_PERIODEEVALUATIE_FK  
 
-left join Schooljaren on Schooljaren.ID = Vakkenpakketten.VK_SCHOOLJAAR_FK
 
 
 

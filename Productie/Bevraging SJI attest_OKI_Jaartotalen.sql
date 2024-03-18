@@ -28,7 +28,12 @@ select
 	MoederNationaliteit.NA_OMSCHRIJVING as [Nationaliteit moeder],
 	VaderNationaliteit.Na_OMSCHRIJVING as [Nationaliteit vader],
 	LB_ANDERSTALIGENIEUWKOMER as [Andertalige nieuwkomer],
+	
 	Attesten.AT_NAAMOFFICIEEL as [Attest],
+
+	IIF(AT_NAAMOFFICIEEL = 'Oriënteringsattest C' AND Month(LB_TOT) <> 6, 'Wijziging studierichting', Attesten.AT_NAAMOFFICIEEL) as [Attest aangepast], 
+
+
 	Getuigschriften.GT_CLAUSULERING as [Clausulering], 
 	Getuigschriften.GT_DATUMUITGEREIKT as [Datum uitreiking],
 	BasisonderwijsNL.P_OMSCHRIJVING as [Basisonderwijs NL],
@@ -145,8 +150,8 @@ and Evaluatieverwijzingen.EV_TYPE = 1 -- zorgt ervoor dat enkel jaartotalen zich
 
 
 
-
 order by LL_NAAM, LL_VOORNAAM, [Datum uitreiking]
+
 
 --SJI 035527
 --VTI 035584

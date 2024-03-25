@@ -7,7 +7,7 @@ SELECT
 	t2.max_login as [Laatste login],
 	datediff(day, t2.max_login, GETDATE()) as [Aantal dagen geleden],
 	case 
-		when uk1.UK_ROL = 1  then 'Vader'
+		when uk1.UK_ROL = 1 then 'Vader'
 		when uk1.UK_ROL = 2 then 'Moeder'
 		when uk1.UK_ROL = 3 then 'Voogd'
 		when uk1.UK_ROL = 4 then 'Pluspapa'
@@ -26,6 +26,11 @@ inner join (
 		group by UK2.UK_SOURCE_FK	
 		) t2 on t2.max_login = U1.U_LAATSTELOGIN and t2.UK_SOURCE_FK = uk1.UK_SOURCE_FK
 )
+
+
+
+
+
 
 
 select 
@@ -59,7 +64,7 @@ select
 	
 	Attesten.AT_NAAMOFFICIEEL as [Attest],
 
-	IIF(AT_NAAMOFFICIEEL = 'Oriënteringsattest C' AND Month(LB_TOT) <> 6, 'Wijziging studierichting', Attesten.AT_NAAMOFFICIEEL) as [Attest aangepast], 
+	IIF(AT_NAAMOFFICIEEL = 'Oriënteringsattest C' AND Month(LB_TOT) <> 6, 'Wijziging studierichting', Attesten.AT_NAAMOFFICIEEL) as [Attest aangepast],				--bijgekomen op vraag van SJI omdat voor de modernisering iemand die van klas veranderde een C-attest kreeg.
 
 
 	Getuigschriften.GT_CLAUSULERING as [Clausulering], 
@@ -92,6 +97,7 @@ select
 	Leerlingkenmerken.isTaalVanLeerlingNietNederlandsSet as [Thuistaal niet-Nederlands],
 
 
+
 	--BeoordelingWaardes.ID as [ID Beoordelingswaarde],
 	--BeoordelingBerekeningen.BB_CODE as [Code beoordelingsberekening],
 	--BeoordelingBerekeningen.BB_OMSCHRIJVING as [Omschrijving beoordelingsberekening],
@@ -117,8 +123,19 @@ select
 	--BB_TYPE_FKP
 	tijdelijk.[Laatste login],
 	tijdelijk.[Aantal dagen geleden],
-	tijdelijk.[Wie laatst ingelogd]
+	tijdelijk.[Wie laatst ingelogd],
 	
+	ag.AG_OMSCHRIJVING as [Administratieve groep kort],
+	ag.AG_OMSCHRIJVINGVOLLEDIG [Administratieve groep volledig],
+	Domein.P_OMSCHRIJVING as Domein,
+	Finaliteit.P_OMSCHRIJVING as Finaliteit,
+	LeerjaarInGraad.P_OMSCHRIJVING as LeerjaarInGraad,
+	Onderwijsvorm.P_OMSCHRIJVING as Onderwijsvorm,
+	Soortleerjaar.P_OMSCHRIJVING as Soortleerjaar,
+	Stemcategorie.P_OMSCHRIJVING as Stemcategorie,
+	Studiegebied.P_OMSCHRIJVING as Studiegebied,
+	Studierichting.P_OMSCHRIJVING as Studierichting
+
 
 
 
@@ -169,6 +186,16 @@ left join PeriodeEvaluaties pe2 on pe2.ID = Examens.EX_PERIODEEVALUATIE_FK
 left join PeriodeEvaluaties pe3 on pe3.ID = Dagelijkswerken.DR_PERIODEEVALUATIE_FK  
 left join tijdelijk on tijdelijk.UK_SOURCE_FK = Leerlingen.ID
 
+left join AdmGroepen ag on ag.ID = Loopbanen.LB_ADMGROEP_FK
+left join ParmTabs Domein on ag.AG_DOMEIN_FKP = Domein.ID
+left join ParmTabs Finaliteit on Ag.AG_FINALITEIT_FKP = Finaliteit.ID
+left join ParmTabs LeerjaarInGraad on ag.AG_LEERJAARINGRAAD_FKP = LeerjaarInGraad.ID
+left join ParmTabs Onderwijsvorm on ag.AG_ONDERWIJSVORM_FKP = Onderwijsvorm.ID
+left join ParmTabs Soortleerjaar on ag.AG_SOORTLEERJAAR_FKP = Soortleerjaar.ID
+left join ParmTabs Stemcategorie on ag.AG_STEMCATEGORIE_FKP = Stemcategorie.ID
+left join ParmTabs Studiegebied on ag.AG_STUDIEGEBIED_FKP = Studiegebied.ID
+left join ParmTabs Studierichting on ag.AG_STUDIERICHTING_FKP = Studierichting.ID
+
 
 
 
@@ -190,9 +217,7 @@ order by LL_NAAM, LL_VOORNAAM, [Datum uitreiking]
 --VTI 035584
 
 
--- graad
--- richting
--- finaliteit
+
 -- schoolse achterstand
 -- punten van vakken
 -- afwezigenheden (gewoon, problematisch)
@@ -203,13 +228,7 @@ order by LL_NAAM, LL_VOORNAAM, [Datum uitreiking]
 -- diploma leerkrachten
 -- welke leerkracht
 -- lagere school
-
-
-
-
-
 -- internaat
--- zij-instromer
 -- hoeveel adressen
 
 

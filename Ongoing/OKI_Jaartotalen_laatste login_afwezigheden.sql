@@ -137,7 +137,7 @@ Schooljaar,
 	SUM(CASE WHEN AC_CODE = 'H1' THEN [Aantal halve dagen] ELSE 0 END) AS [H1],
 	SUM(CASE WHEN AC_CODE = 'EX' THEN [Aantal halve dagen] ELSE 0 END) AS [EX],
 	SUM(CASE WHEN AC_CODE = 'WO' THEN [Aantal halve dagen] ELSE 0 END) AS [WO],
-    SUM([Aantal halve dagen]) AS Totaal_aantal_halve_dagen
+    SUM([Aantal halve dagen]) AS [Totaal aantal halve dagen afwezig of laat]
 
 from lengte
 group by LL_ID, Schooljaar
@@ -182,6 +182,9 @@ select
 	--LL_GOK, 
 	KL_OMSCHRIJVING as Klas,
 	SJ_OMSCHRIJVINGKORT as Schooljaar2,
+	SJ_GELDIGVAN as [Begin Schooljaar],
+	LL_GEBOORTEDATUM as Geboortedatum,
+
 	leerjaar.P_OMSCHRIJVING as Leerjaar,
 	case 
 		when leerjaar.P_OMSCHRIJVING = 'Eerste leerjaar' then 1
@@ -359,13 +362,42 @@ and BO_TYPE = 2 -- zorgt ervoor dat de toetsen/taken niet weergegeven worden
 and BB_TYPE_FKP <> 15237  -- zorgt ervoor dat de deelresultaten niet weergegeven worden
 and Evaluatieverwijzingen.EV_TYPE = 1 -- zorgt ervoor dat enkel jaartotalen zichtbaar zijn
 
---and ll_naam = 'Roobroeck'
+--and LL_VOORNAAM like 'Lander' and LL_NAAM = 'Couvreur'
+),
+
+adressen as (
+	select LA_LEERLING_FK, 
+	count(*) as [Verschillende adressen],
+	max(Gemeenten.GM_FUSIEGEMEENTE) as [Fusiegemeente officieel adres],
+	max(Gemeenten.GM_DEELGEMEENTE) as [Deelgemeente officieel adres]
+
+	from LeerlingAdressen
+	left join Gemeenten on Gemeenten.ID = LA_GEMEENTE_FK and LA_TYPEADRES_FKP = 994
+	group by LA_LEERLING_FK
 )
 
-select *
+
+
+
+select 
+verder.*,
+case
+	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 18 then 7-[Nummer leerjaar]
+	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 17 then 6-[Nummer leerjaar]
+	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 16 then 5-[Nummer leerjaar]
+	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 15 then 4-[Nummer leerjaar]
+	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 14 then 3-[Nummer leerjaar]
+	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 13 then 2-[Nummer leerjaar]
+	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 12 then 1-[Nummer leerjaar]
+end as [Schoolse achterstand],
+adressen.[Verschillende adressen],
+adressen.[Fusiegemeente officieel adres],
+adressen.[Deelgemeente officieel adres]
+
+
+
 from verder
-
-
+left join adressen on LL_ID2 = adressen.LA_LEERLING_FK
 order by LL_NAAM, LL_VOORNAAM, [Datum uitreiking]
 
 
@@ -376,7 +408,7 @@ OPTION (MAXRECURSION 0)
 
 
 
--- schoolse achterstand
+
 -- zij-instromers, en vanuit welke school
 -- klaswijziging, en vanuit welke klas
 -- leerkrachten
@@ -384,7 +416,7 @@ OPTION (MAXRECURSION 0)
 -- welke leerkracht
 -- lagere school
 -- internaat
--- hoeveel adressen
+
 
 
 

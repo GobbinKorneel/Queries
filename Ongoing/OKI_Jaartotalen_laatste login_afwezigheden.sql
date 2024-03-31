@@ -172,6 +172,10 @@ inner join (
 
 verder as(
 select 
+	instellingen.ID as IS_ID,
+	klassen.KL_CODE,
+	schooljaren.ID as SJ_ID,
+	IngVakken.ID as IV_ID,
 	Leerlingen.ID as LL_ID2,
 	CONVERT(BINARY(64), hashbytes('SHA2_512', CONCAT(Leerlingen.ID, '|', Leerlingen.LL_NAAM, '|', Leerlingen.LL_Voornaam, ''))) as hashID,
 	LB_VAN as [Loopbaan van],
@@ -374,6 +378,55 @@ adressen as (
 	from LeerlingAdressen
 	left join Gemeenten on Gemeenten.ID = LA_GEMEENTE_FK and LA_TYPEADRES_FKP = 994
 	group by LA_LEERLING_FK
+),
+
+Diploma as
+(
+select 
+PersoneelDiplomas.DP_PERSONEEL_FK as PS_ID,
+STRING_AGG(PersoneelDiplomas.DP_PLAATSUITREIKING, ' && ') as [Plaats(en) uitreiking],
+STRING_AGG(PersoneelDiplomas.DP_GETUIGSCHRIFT, ' && ') as [Getuigschrift(en)],
+String_AGG(PersoneelDiplomas.DP_DATUMUITGEREIKT, ' && ') as [Datum(s) uitreiken],
+String_Agg(Niveau.P_OMSCHRIJVING, ' && ') as [Niveau('s)]
+from personeeldiplomas 
+left join ParmTabs Niveau on Niveau.ID = PersoneelDiplomas.DP_NIVEAU_FKP
+
+group by PersoneelDiplomas.DP_PERSONEEL_FK
+),
+
+lkr as (
+	select
+	IV_NAAMGEBRUIKER,
+	iv.ID as IV_ID,
+	--PS_NAAM,
+	--PS_VOORNAAM,
+	COALESCE(lsd.LSD_KLASCODE, kl.KL_CODE, kl1.KL_CODE) as Klascode,
+	SJ.ID as SJ_ID,
+	ins.ID as IS_ID,
+	STRING_AGG([PS_NAAM] + ' ' + PS_VOORNAAM, ' && ') as [Leerkracht(en) gekoppeld aan vak],
+	STRING_AGG(Diploma.[Getuigschrift(en)], ' && ') as [Getuigschrift(en)],
+	STRING_AGG(Diploma.[Plaats(en) uitreiking], ' && ') as [Plaats(en) uitreiken],
+	STRING_AGG(Diploma.[Datum(s) uitreiken], ' && ') as [Datum(s) uitreiken],
+	STRING_AGG(Diploma.[Niveau('s)], ' && ') as [Niveau('s)]
+
+	
+
+	from Lesverdelingen lt
+	left join Schooljaren sj on sj.ID = lt.LT_SCHOOLJAAR_FK
+	left join Instellingen ins on ins.ID = lt.LT_INSTELLING_FK
+	left join Lesverdelingdetails ltd on lt.ID = ltd.LTD_LESVERDELING_FK
+	left join IngVakken iv on iv.ID = LTD_VAK_FK
+	left join Personeel ps on ps.id = LTD_PERSONEEL_FK
+	left join Lesgroepen lg on lg.ID = ltd.LTD_GROEP_FK and ltd.LTD_GROEPTYPE = 3
+	left join Lesgroepdetails lsd on lg.ID = lsd.LSD_LESGROEP_FK and ltd.LTD_GROEPTYPE = 3
+	left join Klassen kl on kl.ID = ltd.LTD_GROEP_FK and ltd.LTD_GROEPTYPE = 0
+	left join Leseenheden le on le.ID = ltd.LTD_GROEP_FK and ltd.LTD_GROEPTYPE = 2
+	left join Klassen kl1 on kl1.ID = le.LE_KLAS_FK and ltd.LTD_GROEPTYPE = 2
+	left join Diploma on Diploma.PS_ID = ps.ID
+
+	group by SJ.ID, ins.ID, LSD_KLASCODE, kl.KL_CODE, kl1.KL_CODE, IV.ID, IV.IV_NAAMGEBRUIKER
+
+
 )
 
 
@@ -382,6 +435,9 @@ adressen as (
 select 
 verder.*,
 case
+	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 21 then 10-[Nummer leerjaar]
+	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 20 then 9-[Nummer leerjaar]
+	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 19 then 8-[Nummer leerjaar]
 	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 18 then 7-[Nummer leerjaar]
 	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 17 then 6-[Nummer leerjaar]
 	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 16 then 5-[Nummer leerjaar]
@@ -392,12 +448,19 @@ case
 end as [Schoolse achterstand],
 adressen.[Verschillende adressen],
 adressen.[Fusiegemeente officieel adres],
-adressen.[Deelgemeente officieel adres]
+adressen.[Deelgemeente officieel adres],
+lkr.[Leerkracht(en) gekoppeld aan vak],
+lkr.[Getuigschrift(en) ],
+lkr.[Plaats(en) uitreiken ],
+lkr.[Datum(s) uitreiken ],
+lkr.[Niveau('s) ]
 
 
 
 from verder
 left join adressen on LL_ID2 = adressen.LA_LEERLING_FK
+left join lkr on lkr.IS_ID = verder.IS_ID and lkr.IV_ID = verder.IV_ID and lkr.Klascode = verder.KL_CODE and lkr.SJ_ID = verder.SJ_ID
+
 order by LL_NAAM, LL_VOORNAAM, [Datum uitreiking]
 
 
@@ -411,9 +474,6 @@ OPTION (MAXRECURSION 0)
 
 -- zij-instromers, en vanuit welke school
 -- klaswijziging, en vanuit welke klas
--- leerkrachten
--- diploma leerkrachten
--- welke leerkracht
 -- lagere school
 -- internaat
 

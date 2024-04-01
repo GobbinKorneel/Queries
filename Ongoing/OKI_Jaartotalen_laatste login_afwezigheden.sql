@@ -360,7 +360,7 @@ left join afwe on Leerlingen.ID = Afwe.LL_ID and Schooljaren.SJ_OMSCHRIJVINGKORT
 
 
 
-where Scholen.SC_INSTELLINGSNUMMER = '035584' 
+where Scholen.SC_INSTELLINGSNUMMER = '035527' 
 and Leerlingkenmerken.isAltijdSet is not null
 and Attesten.AT_HOOFDATTEST = 1
 and BO_TYPE = 2 -- zorgt ervoor dat de toetsen/taken niet weergegeven worden
@@ -531,6 +531,23 @@ from vl2 huidig
 left join vl2 vorig on huidig.[Merge - 1] = vorig.[Merge]
 left join vl2 lagere on huidig.LL_ID = lagere.LL_ID and (lagere.leerjaar = 'Zesde leerjaar' or lagere.leerjaar = 'Vijfde leerjaar' or lagere.leerjaar = 'Onbekend') and lagere.[Index] = 1
 
+),
+
+intern as 
+(
+select 
+ll.ID as LL_ID,
+kl.KL_SCHOOLJAAR_FK as SJ_ID,
+iif(ins.IS_NAAMGEBRUIKER like '%internaat%', 1, 0) as [Intern]
+
+
+from InUit iu
+left join Leerlingen ll on ll.ID = iu.IU_LEERLING_FK
+left join Loopbanen lb on iu.ID = lb.LB_INUIT_FK
+left join Klasgroepen kg on kg.id = lb.LB_KLASGROEP_FK
+left join Klassen kl on kl.ID = kg.KG_KLAS_FK
+left join Instellingen ins on ins.ID = kl.KL_INSTELLING_FK
+
 )
 
 
@@ -565,7 +582,9 @@ vl3.[Vorige klas],
 vl3.[Vorige school],
 vl3.[Vorige tot],
 vl3.[Lagere school],
-vl3.Lager as [Laatste leerjaar in lagere school]
+vl3.Lager as [Laatste leerjaar in lagere school],
+
+intern.Intern as Intern
 
 
 
@@ -575,6 +594,7 @@ left join adressen on LL_ID2 = adressen.LA_LEERLING_FK
 left join lkr on lkr.IS_ID = verder.IS_ID and lkr.IV_ID = verder.IV_ID and lkr.Klascode = verder.KL_CODE and lkr.SJ_ID = verder.SJ_ID
 
 left join vl3 on LL_ID2 = vl3.LL_ID and vl3.SJ_ID = verder.SJ_ID and vl3.KL_ID = verder.KL_ID
+left join intern on intern.LL_ID = verder.LL_ID2 and intern.SJ_ID = verder.SJ_ID
 
 
 

@@ -538,7 +538,8 @@ intern as
 select 
 ll.ID as LL_ID,
 kl.KL_SCHOOLJAAR_FK as SJ_ID,
-iif(ins.IS_NAAMGEBRUIKER like '%internaat%', 1, 0) as [Intern]
+1 as [Intern],
+MAX(INS.IS_NAAMGEBRUIKER) as [Internaat]
 
 
 from InUit iu
@@ -547,6 +548,11 @@ left join Loopbanen lb on iu.ID = lb.LB_INUIT_FK
 left join Klasgroepen kg on kg.id = lb.LB_KLASGROEP_FK
 left join Klassen kl on kl.ID = kg.KG_KLAS_FK
 left join Instellingen ins on ins.ID = kl.KL_INSTELLING_FK
+left join Scholen sc on sc.id = iu.IU_SCHOOL_FK
+
+where ins.IS_NAAMGEBRUIKER like '%internaat%'
+
+group by ll.ID, kl.KL_SCHOOLJAAR_FK
 
 )
 

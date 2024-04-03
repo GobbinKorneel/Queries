@@ -1,10 +1,5 @@
 use WiseZonderFK;
 
-
-
-
-
-
 verder as(
 select 
 	instellingen.ID as IS_ID,
@@ -26,16 +21,7 @@ select
 	LL_GEBOORTEDATUM as Geboortedatum,
 
 	leerjaar.P_OMSCHRIJVING as Leerjaar,
-	case 
-		when leerjaar.P_OMSCHRIJVING = 'Eerste leerjaar' then 1
-		when leerjaar.P_OMSCHRIJVING = 'Tweede leerjaar' then 2
-		when leerjaar.P_OMSCHRIJVING = 'Derde leerjaar' then 3
-		when leerjaar.P_OMSCHRIJVING = 'Vierde leerjaar' then 4
-		when leerjaar.P_OMSCHRIJVING = 'Vijfde leerjaar' then 5
-		when leerjaar.P_OMSCHRIJVING = 'Zesde leerjaar' then 6
-		when leerjaar.P_OMSCHRIJVING = 'Zevende leerjaar' then 7
-		else 0
-	end as [Nummer leerjaar],		   	 
+		   	 
 	graad.P_OMSCHRIJVING as Graad,
 	LL_GESLACHT AS Geslacht,
 	herkomst.P_OMSCHRIJVING as Herkomst,
@@ -220,18 +206,7 @@ adressen as (
 
 select 
 verder.*,
-case
-	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 21 then 10-[Nummer leerjaar]
-	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 20 then 9-[Nummer leerjaar]
-	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 19 then 8-[Nummer leerjaar]
-	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 18 then 7-[Nummer leerjaar]
-	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 17 then 6-[Nummer leerjaar]
-	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 16 then 5-[Nummer leerjaar]
-	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 15 then 4-[Nummer leerjaar]
-	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 14 then 3-[Nummer leerjaar]
-	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 13 then 2-[Nummer leerjaar]
-	when DATEPART(year, [Begin Schooljaar]) - DATEPART(year, Geboortedatum) = 12 then 1-[Nummer leerjaar]
-end as [Schoolse achterstand],
+
 adressen.[Verschillende adressen],
 adressen.[Fusiegemeente officieel adres],
 adressen.[Deelgemeente officieel adres],

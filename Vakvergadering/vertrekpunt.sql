@@ -216,54 +216,6 @@ adressen as (
 	group by LA_LEERLING_FK
 ),
 
-Diploma as
-(
-select 
-PersoneelDiplomas.DP_PERSONEEL_FK as PS_ID,
-STRING_AGG(PersoneelDiplomas.DP_PLAATSUITREIKING, ' && ') as [Plaats(en) uitreiking],
-STRING_AGG(PersoneelDiplomas.DP_GETUIGSCHRIFT, ' && ') as [Getuigschrift(en)],
-String_AGG(PersoneelDiplomas.DP_DATUMUITGEREIKT, ' && ') as [Datum(s) uitreiken],
-String_Agg(Niveau.P_OMSCHRIJVING, ' && ') as [Niveau('s)]
-from personeeldiplomas 
-left join ParmTabs Niveau on Niveau.ID = PersoneelDiplomas.DP_NIVEAU_FKP
-
-group by PersoneelDiplomas.DP_PERSONEEL_FK
-),
-
-lkr as (
-	select
-	IV_NAAMGEBRUIKER,
-	iv.ID as IV_ID,
-	--PS_NAAM,
-	--PS_VOORNAAM,
-	COALESCE(lsd.LSD_KLASCODE, kl.KL_CODE, kl1.KL_CODE) as Klascode,
-	SJ.ID as SJ_ID,
-	ins.ID as IS_ID,
-	STRING_AGG([PS_NAAM] + ' ' + PS_VOORNAAM, ' && ') as [Leerkracht(en) gekoppeld aan vak],
-	STRING_AGG(Diploma.[Getuigschrift(en)], ' && ') as [Getuigschrift(en)],
-	STRING_AGG(Diploma.[Plaats(en) uitreiking], ' && ') as [Plaats(en) uitreiken],
-	STRING_AGG(Diploma.[Datum(s) uitreiken], ' && ') as [Datum(s) uitreiken],
-	STRING_AGG(Diploma.[Niveau('s)], ' && ') as [Niveau('s)]
-
-	
-
-	from Lesverdelingen lt
-	left join Schooljaren sj on sj.ID = lt.LT_SCHOOLJAAR_FK
-	left join Instellingen ins on ins.ID = lt.LT_INSTELLING_FK
-	left join Lesverdelingdetails ltd on lt.ID = ltd.LTD_LESVERDELING_FK
-	left join IngVakken iv on iv.ID = LTD_VAK_FK
-	left join Personeel ps on ps.id = LTD_PERSONEEL_FK
-	left join Lesgroepen lg on lg.ID = ltd.LTD_GROEP_FK and ltd.LTD_GROEPTYPE = 3
-	left join Lesgroepdetails lsd on lg.ID = lsd.LSD_LESGROEP_FK and ltd.LTD_GROEPTYPE = 3
-	left join Klassen kl on kl.ID = ltd.LTD_GROEP_FK and ltd.LTD_GROEPTYPE = 0
-	left join Leseenheden le on le.ID = ltd.LTD_GROEP_FK and ltd.LTD_GROEPTYPE = 2
-	left join Klassen kl1 on kl1.ID = le.LE_KLAS_FK and ltd.LTD_GROEPTYPE = 2
-	left join Diploma on Diploma.PS_ID = ps.ID
-
-	group by SJ.ID, ins.ID, LSD_KLASCODE, kl.KL_CODE, kl1.KL_CODE, IV.ID, IV.IV_NAAMGEBRUIKER
-
-
-),
 
 
 select 
@@ -314,7 +266,7 @@ left join intern on intern.LL_ID = verder.LL_ID2 and intern.SJ_ID = verder.SJ_ID
 
 order by LL_NAAM, LL_VOORNAAM, [Datum uitreiking]
 
-OPTION (MAXRECURSION 0)
+
 
 --SJI 035527
 --VTI 035584

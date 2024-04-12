@@ -37,6 +37,7 @@ HalveDagen as(
 Afwezigheid AS (	
 	SELECT 
 		LL.ID AS LL_ID,
+		LB.ID AS LB_ID,
 		AC.AC_OMSCHRIJVING,
 		IIF(af.AF_VANUUR = 1, DATEADD(hour,0, af.AF_VAN), DATEADD(hour,12, af.AF_VAN)) as VAN,  
 		IIF(af.AF_totuur = 1, DATEADD(hour,12, af.AF_TOT), DATEADD(hour,24, af.af_TOT)) as TOT,
@@ -49,7 +50,8 @@ Afwezigheid AS (
 		LEFT JOIN Klasgroepen KG ON KG.ID = LB.LB_KLASGROEP_FK
 		LEFT JOIN Klassen KL ON KL.ID = KG.KG_KLAS_FK
 		LEFT JOIN Schooljaren SJ ON SJ.ID = KL.KL_SCHOOLJAAR_FK
-		LEFT JOIN Afwezigheden AF ON IU.ID = AF.AF_INUIT_FK AND AF.AF_VAN >= SJ.SJ_GELDIGVAN AND AF.AF_TOT <= SJ.SJ_GELDIGTOT
+		--LEFT JOIN Afwezigheden AF ON IU.ID = AF.AF_INUIT_FK AND AF.AF_VAN >= SJ.SJ_GELDIGVAN AND AF.AF_TOT <= SJ.SJ_GELDIGTOT   --> Beter kijken of deze binnen de loopbaan vallen!!!
+		LEFT JOIN Afwezigheden AF ON IU.ID = AF.AF_INUIT_FK AND AF.AF_VAN >= LB.LB_VAN AND AF.AF_TOT <= LB.LB_TOT
 		LEFT JOIN Afwezigheidscodes AC ON AC.ID = AF.AF_CODE_FKP
 		LEFT JOIN Leerlingen LL ON LL.ID = IU.IU_LEERLING_FK
 
@@ -63,6 +65,7 @@ Afwezigheid AS (
 
 AantalHalveDagenCode AS (
 	SELECT 
+		Afwezigheid.LB_ID,
 		Afwezigheid.LL_ID, 
 		Afwezigheid.AC_CODE, 
 		Afwezigheid.SJ_ID, 	
@@ -72,7 +75,7 @@ AantalHalveDagenCode AS (
 	FROM Afwezigheid
 		left join HalveDagen ON HalveDagen.Datum >= Afwezigheid.VAN and HalveDagen.Datum < Afwezigheid.TOT
 
-	GROUP BY Afwezigheid.LL_ID, Afwezigheid.AC_CODE, Afwezigheid.SJ_ID, Afwezigheid.KL_ID
+	GROUP BY Afwezigheid.LL_ID, Afwezigheid.AC_CODE, Afwezigheid.SJ_ID, Afwezigheid.KL_ID, Afwezigheid.LB_ID
 ),
 
 -- In AantalHalveDagenCode worden de halve dagen geteld per code/leerling/klas/schooljaar.
@@ -82,6 +85,7 @@ AantalHalveDagenCode AS (
 		AantalHalveDagenCode.LL_ID,
 		AantalHalveDagenCode.SJ_ID,
 		AantalHalveDagenCode.KL_ID,
+		AantalHalveDagenCode.LB_ID,
   		SUM(CASE WHEN AC_CODE = '''' THEN [Aantal halve dagen] ELSE 0 END) AS ['],
 		SUM(CASE WHEN AC_CODE = '-' THEN [Aantal halve dagen] ELSE 0 END) AS [-],
 		SUM(CASE WHEN AC_CODE = '#' THEN [Aantal halve dagen] ELSE 0 END) AS [#],
@@ -140,7 +144,7 @@ AantalHalveDagenCode AS (
 
 	FROM AantalHalveDagenCode
 
-	GROUP BY AantalHalveDagenCode.LL_ID, AantalHalveDagenCode.SJ_ID, AantalHalveDagenCode.KL_ID
+	GROUP BY AantalHalveDagenCode.LL_ID, AantalHalveDagenCode.SJ_ID, AantalHalveDagenCode.KL_ID, AantalHalveDagenCode.LB_ID
 )
 
 -- In codes afwezigheid wordt er gegroepeerd op LL_ID/SJ_ID/KL_ID. De halve dagen worden opgeteld per code

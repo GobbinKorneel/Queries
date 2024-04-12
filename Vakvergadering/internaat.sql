@@ -1,10 +1,12 @@
 use WiseZonderFK
 
 select 
+
 ll.ID as LL_ID,
 kl.KL_SCHOOLJAAR_FK as SJ_ID,
 1 as [Intern],
 MAX(INS.IS_NAAMGEBRUIKER) as [Internaat]
+
 
 
 from InUit iu
@@ -20,7 +22,9 @@ where ins.IS_NAAMGEBRUIKER like '%internaat%'
 group by ll.ID, kl.KL_SCHOOLJAAR_FK
 
 
+-- koppelen op SJ_ID en LL_ID
+
 -- Er wordt gekeken of er een instelling is die een internaat is. 
 -- Let op: Er blijft ook nog een tweede instelling gekoppeld die de school is.
 -- Dit gebeurt via de instelling die gekoppeld is aan de loopbaan
-
+-- Opgelet: Voor het internaat bertreft het een apart LB_ID!!

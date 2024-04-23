@@ -31,7 +31,9 @@ WITH LL_KL_SJ_SC_INDEX AS
     
 	WHERE LB.LB_TOT <= IU.IU_DATUMUITSCHRIJVING   
 	AND (KL.KL_OMSCHRIJVING <> 'Internaat' OR KL.KL_OMSCHRIJVING IS NULL)
-	AND SC.SC_NAAM NOT LIKE '%Internaat%' ),
+	AND SC.SC_NAAM NOT LIKE '%Internaat%'
+	AND LL.ID IN (select LL_ID from [DBR - Vertrekpunt])
+	),
 
 
 
@@ -44,21 +46,26 @@ LL_ID_EN_INDEX AS (
 )
 
 SELECT 
-	huidig.LL_ID,
-	huidig.LB_ID,
-	vorig.SC_NAAM as [Vorige school],
-	vorig.KL_OMSCHRIJVING as [Vorige klas],
-	vorig.LB_TOT as [Vorige loopbaan tot],
-	lagere.SC_NAAM as [Lagere school],
-	lagere.leerjaar as [Laaste leerjaar in lagere school],
-	IIF(huidig.SJ_ID = vorig.SJ_ID and huidig.SC_ID = vorig.SC_ID, 1, 0) AS [Verandering klas tijdens schooljaar],
-	IIF(huidig.SJ_ID = vorig.SJ_ID and (huidig.SC_ID != vorig.SC_ID or vorig.SC_ID is null), 1, 0) AS [Zij-instromer school tijdens schooljaar],
-	IIF(huidig.SJ_ID = vorig.SJ_ID or huidig.sC_ID = vorig.SC_ID, 0, 1) AS [Instroom in school bij begin schooljaar]
+	h.LL_ID,
+	h.LB_ID,
+	v.SC_NAAM as [Vorige school],
+	v.KL_OMSCHRIJVING as [Vorige klas],
+	v.LB_TOT as [Vorige loopbaan tot],
+	l.SC_NAAM as [Lagere school],
+	l.leerjaar as [Laaste leerjaar in lagere school],
+	IIF(h.SJ_ID = v.SJ_ID and h.SC_ID = v.SC_ID, 1, 0) AS [Verandering klas tijdens schooljaar],
+	IIF(h.SJ_ID = v.SJ_ID and (h.SC_ID != v.SC_ID or v.SC_ID is null), 1, 0) AS [Zij-instromer school tijdens schooljaar],
+	IIF(h.SJ_ID = v.SJ_ID or h.sC_ID = v.SC_ID, 0, 1) AS [Instroom in school bij begin schooljaar]
 	
-FROM LL_ID_EN_INDEX huidig
-left join LL_ID_EN_INDEX vorig on huidig.[Merge - 1] = vorig.[Merge]
-left join LL_ID_EN_INDEX lagere on huidig.LL_ID = lagere.LL_ID and (lagere.leerjaar = 'Zesde leerjaar' or lagere.leerjaar = 'Vijfde leerjaar' or lagere.leerjaar = 'Onbekend') and lagere.Huidig = 1
-
+FROM LL_ID_EN_INDEX h
+left join LL_ID_EN_INDEX v on h.[Merge - 1] = v.[Merge]
+left join LL_ID_EN_INDEX l on h.LL_ID = l.LL_ID and (l.leerjaar = 'Zesde leerjaar' or l.leerjaar = 'Vijfde leerjaar' or l.leerjaar = 'Onbekend') and 
+l.Huidig in
+	(
+		select h1.Vorig 
+		From LL_ID_EN_INDEX h1
+		where h1.LL_ID = h.LL_ID and h1.leerjaar = 'Eerste leerjaar'
+	)
 
 
 -- Koppel op LB_ID?
